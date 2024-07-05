@@ -1,3 +1,7 @@
+"""
+Файл main, представляющий собой точку входа в приложение
+весь функционал представлен в файле image_editor.py
+"""
 import sys
 from PyQt5.QtWidgets import QApplication
 from image_editor import ImageEditor
