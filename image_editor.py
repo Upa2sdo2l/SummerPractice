@@ -1,11 +1,30 @@
 import cv2
 import numpy as np
 from PyQt5.QtWidgets import (QMainWindow,
-                             QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QComboBox, QMessageBox, QLineEdit, QFormLayout)
+                             QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QWidget,
+                             QFileDialog, QComboBox, QMessageBox, QLineEdit, QFormLayout)
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt
 
+
+def show_error_message(message):
+    """
+    Функция, отвечающая за вывод ошибок
+    :param message: передаётся сообщение в зависимости от ошибки
+    """
+    msg_box = QMessageBox()
+    msg_box.setIcon(QMessageBox.Critical)
+    msg_box.setText(message)
+    msg_box.setWindowTitle("Ошибка")
+    msg_box.exec_()
+
+
 class ImageEditor(QMainWindow):
+    """
+    Класс, отвечающий за функционал приложения,
+    в нём находится интерфейс и методы связанные с этим
+    интерфейсом
+    """
     def __init__(self):
         super().__init__()
 
@@ -94,9 +113,16 @@ class ImageEditor(QMainWindow):
         self.setCentralWidget(container)
 
     def load_image(self):
+        """
+        Метод, позволяющий выбрать изображение,
+        прежде чем открыть изображение нужно убедиться,
+        что оно находится в папке проекта, иначе произойдёт
+        вывод ошибки
+        """
         options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getOpenFileName(self, "Загрузить изображение", "",
-                                                   "Images (*.png *.jpg *.jpeg *.bmp)", options=options)
+        file_name, _ = QFileDialog.getOpenFileName(self, "Загрузить изображение",
+                                                   "",
+                                                   "Images (*.png *.jpg *.jpeg)", options=options)
         if file_name:
             try:
                 self.image = cv2.imread(file_name)
@@ -104,10 +130,14 @@ class ImageEditor(QMainWindow):
                 if self.image is None:
                     raise ValueError("Не удалось загрузить изображение")
                 self.display_image()
-            except Exception as e:
-                self.show_error_message(str(e))
+            except Exception:
+                show_error_message("Не удалось загрузить изображение")
 
     def capture_image(self):
+        """
+        Метод, позврляющий получить доступ к веб-камере и сделать снимок,
+        а при её отсутствии выведет соответствующую ошибку
+        """
         try:
             cap = cv2.VideoCapture(0)
             if not cap.isOpened():
@@ -119,10 +149,16 @@ class ImageEditor(QMainWindow):
             self.original_image = self.image.copy()
             self.display_image()
             cap.release()
-        except Exception as e:
-            self.show_error_message(str(e))
+        except Exception as Exc:
+            show_error_message(str(Exc))
 
     def draw_line(self):
+        """
+        Метод, позволяющий нарисовать линию на изображении,
+        пользователь должен ввести
+        координаты и толщину линии,
+        после чего на изображении появится линия, соответсвующая параметрам
+        """
         if self.image is not None:
             try:
                 start_x = int(self.start_x_input.text())
@@ -134,9 +170,13 @@ class ImageEditor(QMainWindow):
                 self.image = cv2.line(self.image, (start_x, start_y), (end_x, end_y), color, thickness)
                 self.display_image()
             except ValueError:
-                self.show_error_message("Координаты и толщина должны быть числами")
+                show_error_message("Координаты и толщина должны быть числами")
 
     def sharpen_image(self):
+        """
+        Метод, позволяющий повысить резкость изображения,
+        при этом резкость можно повысить несколько раз
+        """
         if self.image is not None:
             kernel = np.array([[0, -1, 0],
                                [-1, 5, -1],
@@ -145,6 +185,10 @@ class ImageEditor(QMainWindow):
             self.display_image()
 
     def rotate_image(self):
+        """
+        Метод, позволяющий вращать изображение,
+        пользователь сам задаёт угол вращения
+        """
         if self.image is not None:
             try:
                 angle = float(self.angle_input.text())
@@ -154,20 +198,30 @@ class ImageEditor(QMainWindow):
                 self.image = cv2.warpAffine(self.image, matrix, (width, height))
                 self.display_image()
             except ValueError:
-                self.show_error_message("Угол вращения должен быть числом")
+                show_error_message("Угол вращения должен быть числом")
 
     def clear_lines(self):
+        """
+        Метод, удаляющий раннее нарисованные линии
+        """
         if self.image is not None:
             self.image = self.original_image.copy()  # Restore original image
             self.display_image()
 
     def reset_rotation(self):
+        """
+        Метод, сбрасывающий вращение изображения
+        """
         if self.image is not None and self.original_image is not None:
             self.image = self.original_image.copy()
             self.angle_input.clear()
             self.display_image()
 
     def change_channel(self):
+        """
+        Метод, позволяющий просматривать rgb каналы
+        изображения на выбор пользователя
+        """
         if self.image is not None:
             index = self.channel_selector.currentIndex()
             if index == 0:
@@ -184,6 +238,9 @@ class ImageEditor(QMainWindow):
                 self.display_image(channel_img)
 
     def display_image(self, img=None):
+        """
+        Метод, отвечающий за вывод изображения на экран
+        """
         if img is None:
             img = self.image
 
@@ -199,9 +256,3 @@ class ImageEditor(QMainWindow):
         self.image_label.setScaledContents(True)
 
 
-    def show_error_message(self, message):
-        msg_box = QMessageBox()
-        msg_box.setIcon(QMessageBox.Critical)
-        msg_box.setText(message)
-        msg_box.setWindowTitle("Ошибка")
-        msg_box.exec_()
