@@ -45,13 +45,13 @@ class ImageEditor(QMainWindow):
         self.draw_line_button = QPushButton('Нарисовать линию', self)
         self.draw_line_button.clicked.connect(self.draw_line)
 
-        self.sharpen_button = QPushButton('Изменить резкость', self)
+        self.sharpen_button = QPushButton('Увеличить резкость', self)
         self.sharpen_button.clicked.connect(self.sharpen_image)
 
         self.rotate_button = QPushButton('Вращать изображение', self)
         self.rotate_button.clicked.connect(self.rotate_image)
 
-        self.clear_lines_button = QPushButton('Очистить линии', self)
+        self.clear_lines_button = QPushButton('Удалить линии', self)
         self.clear_lines_button.clicked.connect(self.clear_lines)
 
         self.reset_rotation_button = QPushButton('Сбросить вращение', self)
