@@ -131,7 +131,9 @@ class ImageEditor(QMainWindow):
                     raise ValueError("Не удалось загрузить изображение")
                 self.display_image()
             except Exception:
-                show_error_message("Не удалось загрузить изображение")
+                show_error_message("Не удалось загрузить изображение. "
+                                   "убедитесь, что в пути изображения "
+                                   "не содержатся русские буквы и специальные символы ")
 
     def capture_image(self):
         """
